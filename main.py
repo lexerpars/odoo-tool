@@ -6,7 +6,7 @@ Created on Tue Jun  8 13:10:41 2021
 """
 
 import argparse
-from model import auth
+from model import auth,update_nomina
 
 def parser():
     pars = argparse.ArgumentParser(description='Script Odoo codigo automatiza tareas')
@@ -20,7 +20,12 @@ def parser():
 def main(arguments):
     print(arguments)
     conexion = auth.Conexion(usuario=arguments.login,clave=arguments.password,db=arguments.db,host=arguments.host)
-    conexion.authentic()
+    uid = conexion.authentic()
+    if uid:
+        odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
+        odoo_op.update_journal()
+        odoo_op.update_structure()
+        odoo_op.update_rule()
     
 if __name__ == '__main__':
     arguments = parser()
