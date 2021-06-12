@@ -8,6 +8,7 @@ Created on Sat Jun 12 00:52:32 2021
 from xmlrpc import client
 from . import excel
 from os.path import dirname, abspath
+import numpy as np
 
 class odoo:
     
@@ -85,8 +86,35 @@ class odoo:
         root = dirname(dirname(abspath(__file__)))
         my_file = excel.Excel()
         result = my_file.read_file(file=root+'/data/anticipo.xlsx')
-        for r in result:
-            print(r)
+        for struct in structure:
+            for r in result:
+                rule = self.read(model='hr.salary.rule',method='search_read',
+                        domain=[[['struct_id','=',struct['id']],['code','=',r]]]
+                        ,fields={'fields':['name','struct_id','code']})
+                if rule:
+                    keys = {1:'account_debit',2:'account_credit',3:'amount_python_compute'}
+                    insert_dict = {}
+                    for c in r:
+                        if r.index(c) > 0:
+                            if str(type(c)) == "<class 'str'>":
+                                if r.index(c) in [1,2]:
+                                    account = self.read(model='account.account'
+                                    ,method='search_read'
+                                    ,domain=[[['code','=',c]
+                                    ,['company_id','=',struct['company_id'][0]]]]
+                                    ,fields={'fields':['name','company_id']},limit=1)
+                                    insert_dict[keys[r.index(c)]]=account[0]['id']
+                                else:
+                                    insert_dict[keys[r.index(c)]]=c
+                    print(insert_dict)
+                    if insert_dict:
+                        print('final_update')
+                        self.write(model='hr.salary.rule',method='write'
+                            ,domain=[[rule[0]['id']],insert_dict])
+                    
+                        
+            
+            
 
         
         
