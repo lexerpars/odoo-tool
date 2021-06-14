@@ -78,18 +78,25 @@ class odoo:
                     self.write(model='hr.payroll.structure',method='write'
                                ,domain=[[struct['id']],{'journal_id':journal[0]['id']}])
                     print('structure update ok!')
+    
+    def update_all_rules(self):
+        files = []
+        files.append({'path':'/data/anticipo.xlsx','tipo':'anticipo'})
+        files.append({'path':'/data/mensual.xlsx','tipo':'mensual'})
+        for file in files:
+            self.update_rule(filename=file['path'],tipo_estructura=file['tipo'])
                     
-    def update_rule(self):
+    def update_rule(self,filename,tipo_estructura):
         structure = self.read(model='hr.payroll.structure',method='search_read'
-                             ,domain=[[['name','ilike','anticipo']]]
+                             ,domain=[[['name','ilike',tipo_estructura]]]
                              ,fields={'fields':['name','company_id']})
         root = dirname(dirname(abspath(__file__)))
         my_file = excel.Excel()
-        result = my_file.read_file(file=root+'/data/anticipo.xlsx')
+        result = my_file.read_file(file=root+filename)
         for struct in structure:
             for r in result:
                 rule = self.read(model='hr.salary.rule',method='search_read',
-                        domain=[[['struct_id','=',struct['id']],['code','=',r]]]
+                        domain=[[['struct_id','=',struct['id']],['code','=',r[0]]]]
                         ,fields={'fields':['name','struct_id','code']})
                 if rule:
                     keys = {1:'account_debit',2:'account_credit',3:'amount_python_compute'}

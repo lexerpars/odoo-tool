@@ -25,7 +25,7 @@ def main(arguments):
         odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
         odoo_op.update_journal()
         odoo_op.update_structure()
-        odoo_op.update_rule()
+        odoo_op.update_all_rules()
     
 if __name__ == '__main__':
     arguments = parser()
