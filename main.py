@@ -34,9 +34,8 @@ def main(arguments):
                 break
             elif op == '2':
                 odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
-                r=odoo_op.read(model='hr.employee',method='search_read',
-                             domain=[[['name','=','Jorge Corzo de la Cerda']]],
-                             fields={'fields':['name','leave_date_from','leave_date_to']})
+                r=odoo_op.write(model='hr.contract',method='write',
+                             domain=[[6],{'date_generated_from':'2021-04-21','date_generated_to':'2021-04-21'}])
                 print(r)
             elif op == '1':
                 odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
