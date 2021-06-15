@@ -22,10 +22,30 @@ def main(arguments):
     conexion = auth.Conexion(usuario=arguments.login,clave=arguments.password,db=arguments.db,host=arguments.host)
     uid = conexion.authentic()
     if uid:
-        odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
-        odoo_op.update_journal()
-        odoo_op.update_structure()
-        odoo_op.update_all_rules()
+        while True:
+            print('Welcome to Odoo Tool')
+            print('Select to option')
+            print('1 -  Payroll Update')
+            print('2 -  Update records')
+            print('3 -  Exit')
+            op = input('>')
+            if op == '3':
+                print('Ok! Bye')
+                break
+            elif op == '2':
+                odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
+                r=odoo_op.read(model='hr.employee',method='search_read',
+                             domain=[[['name','=','Jorge Corzo de la Cerda']]],
+                             fields={'fields':['name','leave_date_from','leave_date_to']})
+                print(r)
+            elif op == '1':
+                odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
+                odoo_op.update_journal()
+                odoo_op.update_structure()
+                odoo_op.update_all_rules()
+            else:
+                print('Opcion no valida!')
+                break
     
 if __name__ == '__main__':
     arguments = parser()
