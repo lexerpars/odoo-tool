@@ -19,6 +19,16 @@ class odoo:
         self.host = host
         self.default_method = '/xmlrpc/2/object'
         self.server = client.ServerProxy(self.host+self.default_method,verbose=False)
+        
+    def custom(self,**kwargs):
+        self.server.execute_kw(
+            self.db
+            ,self.uid
+            ,self.clave
+            ,kwargs['model']
+            ,kwargs['method']
+            ,kwargs['domain']) 
+        
     
     
     def read(self,**kwargs):
@@ -31,7 +41,15 @@ class odoo:
             ,kwargs['domain']
             ,kwargs['fields'])
         return res
-        
+    
+    def unlink(self,**kwargs):
+        self.server.execute_kw(
+            self.db
+            ,self.uid
+            ,self.clave
+            ,kwargs['model']
+            ,kwargs['method']
+            ,kwargs['domain'])        
         
     
     def write(self,**kwargs):
@@ -61,6 +79,37 @@ class odoo:
                                     ,{'default_debit_account_id':account[0]['id']
                                     ,'default_credit_account_id':account[0]['id']}])
                 print('update ok!')
+    
+    def reset_attendence(self):
+        """
+        **********************************************************************
+        DELETE ALL HR ENTRY WORK FOR ALL EMPLOYEES
+        **********************************************************************
+        """
+        hr_work_entry = self.read(model='hr.work.entry',method='search_read',
+                                  domain=[[]],fields={'fields':['name']})
+        print(hr_work_entry)
+        if hr_work_entry:
+            for hwe  in hr_work_entry:
+                self.unlink(model='hr.work.entry',method='unlink',domain=[[hwe['id']]])
+            
+        contracts = self.read(model='hr.contract',method='search_read',
+                              domain=[[]],fields={'fields':['name']})
+        for contract in contracts:
+            self.write(model='hr.contract',method='write',domain=[[contract['id']]
+            ,{'date_generated_from':'2021-04-21','date_generated_to':'2021-04-21'}])
+        """
+        ***********************************************************************
+        GENERATE ATTENDANCE
+        **********************************************************************
+        """
+        employees = self.read(model='hr.employee',method='search_read',
+                              domain=[[]],fields={'fields':['name']})
+        print(employees)
+        for employee in employees:
+            self.custom(model='hr.employee',method="generate_work_entries",
+                        domain=[employee['id'],'2021-04-21','2021-04-21'])
+        
     
     def update_structure(self):
         structure = self.read(model='hr.payroll.structure',method='search_read'

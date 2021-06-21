@@ -26,17 +26,15 @@ def main(arguments):
             print('Welcome to Odoo Tool')
             print('Select to option')
             print('1 -  Payroll Update')
-            print('2 -  Update records')
+            print('2 -  Reset all attendences')
             print('3 -  Exit')
-            op = input('>')
+            op = input('>  ')
             if op == '3':
                 print('Ok! Bye')
                 break
             elif op == '2':
                 odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
-                r=odoo_op.write(model='hr.contract',method='write',
-                             domain=[[6],{'date_generated_from':'2021-04-21','date_generated_to':'2021-04-21'}])
-                print(r)
+                odoo_op.reset_attendence()
             elif op == '1':
                 odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
                 odoo_op.update_journal()
