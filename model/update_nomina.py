@@ -28,9 +28,7 @@ class odoo:
             ,kwargs['model']
             ,kwargs['method']
             ,kwargs['domain']) 
-        
-    
-    
+
     def read(self,**kwargs):
         res = self.server.execute_kw(
             self.db
@@ -79,6 +77,7 @@ class odoo:
                                     ,{'default_debit_account_id':account[0]['id']
                                     ,'default_credit_account_id':account[0]['id']}])
                 print('update ok!')
+                
     
     def reset_attendence(self):
         """
@@ -92,12 +91,32 @@ class odoo:
         if hr_work_entry:
             for hwe  in hr_work_entry:
                 self.unlink(model='hr.work.entry',method='unlink',domain=[[hwe['id']]])
+        
+        company_ids = self.read(model='res.company',method='search_read',
+                                  domain=[[]],fields={'fields':['name']})
+        calendars={}
+        for company_id in company_ids:
+            res = self.read(model='resource.calendar',method='search_read',
+                                  domain=[[['company_id','=',company_id['id']],
+                                ['name', 'like','Estandar 44 horas/semana ']]]
+                                ,fields={'fields':['name','company_id']})
+            if res:
+                calendars[res[0]['company_id'][0]] = res[0]['id']
+            
             
         contracts = self.read(model='hr.contract',method='search_read',
-                              domain=[[]],fields={'fields':['name']})
+                              domain=[[]],fields={'fields':['name','company_id','employee_id']})
+        
         for contract in contracts:
-            self.write(model='hr.contract',method='write',domain=[[contract['id']]
-            ,{'date_generated_from':'2021-04-21','date_generated_to':'2021-04-21'}])
+            print(contract)
+            if contract['company_id'][0] in calendars:
+                self.write(model='hr.contract',method='write',domain=[[contract['id']],
+                {'date_generated_from':'2021-04-21','date_generated_to':'2021-04-21'
+                 ,'resource_calendar_id':calendars[contract['company_id'][0]]}])
+                if contract['employee_id']:
+                    self.write(model='hr.employee',method='write',domain=[[contract['employee_id'][0]],
+                    {'resource_calendar_id':calendars[contract['company_id'][0]]}])
+    
         """
         ***********************************************************************
         GENERATE ATTENDANCE
@@ -110,7 +129,6 @@ class odoo:
             self.custom(model='hr.employee',method="generate_work_entries",
                         domain=[employee['id'],'2021-04-21','2021-04-21'])
         
-    
     def update_structure(self):
         structure = self.read(model='hr.payroll.structure',method='search_read'
                              ,domain=[[]]

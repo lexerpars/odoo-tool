@@ -27,11 +27,13 @@ def main(arguments):
             print('Select to option')
             print('1 -  Payroll Update')
             print('2 -  Reset all attendences')
-            print('3 -  Exit')
+            print('0 -  Exit')
             op = input('>  ')
-            if op == '3':
+            if op == '0':
                 print('Ok! Bye')
                 break
+            elif op == '4':
+                print(1)
             elif op == '2':
                 odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
                 odoo_op.reset_attendence()
