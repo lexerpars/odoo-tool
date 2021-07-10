@@ -33,7 +33,8 @@ def main(arguments):
                 print('Ok! Bye')
                 break
             elif op == '4':
-                print(1)
+                odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
+                odoo_op.users()
             elif op == '2':
                 odoo_op = update_nomina.odoo(uid=uid,clave=arguments.password,db=arguments.db,host=arguments.host)
                 odoo_op.reset_attendence()
@@ -45,7 +46,7 @@ def main(arguments):
             else:
                 print('Opcion no valida!')
                 break
-    
+
 if __name__ == '__main__':
     arguments = parser()
     main(arguments)
